@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>USB Camera Snapshot</title>
+<style>
+  body {
+    background: #111;
+    color: #eee;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+  }
+  video {
+    width: 80vw;
+    max-width: 1280px;
+    border-radius: 8px;
+    background: black;
+  }
+  button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 18px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+  <video id="cam" autoplay playsinline></video>
+  <button id="snap">📸 Take Snapshot</button>
+
+  <!-- Hidden canvas for capturing frames -->
+  <canvas id="canvas" style="display:none;"></canvas>
+
+  <script>
+    async function startCamera() {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 1920 }, height: { ideal: 1080 } }
+      });
+      document.getElementById("cam").srcObject = stream;
+    }
+
+    function takeSnapshot() {
+      const video = document.getElementById("cam");
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      // match canvas size to video stream dimensions
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      // draw current frame from the video
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // convert canvas to PNG data URL
+      const dataURL = canvas.toDataURL("image/png");
+
+      // create download link automatically
+      const link = document.createElement("a");
+      link.href = dataURL;
+      link.download = "snapshot.png";
+      link.click();
+    }
+
+    document.getElementById("snap").addEventListener("click", takeSnapshot);
+
+    startCamera();
+  </script>
+</body>
+</html>
